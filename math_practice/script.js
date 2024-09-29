@@ -9,7 +9,8 @@ let currentQuestion = generateQuestion();
 
 document.getElementById('question').innerHTML = `${currentQuestion.num1} + ${currentQuestion.num2} = ?`;
 
-document.getElementById('submitBtn').addEventListener('click', function() {
+// 確認答案的功能
+function checkAnswer() {
     const userAnswer = parseInt(document.getElementById('answerInput').value);
     const feedback = document.getElementById('feedback');
     const nextQuestionBtn = document.getElementById('nextQuestionBtn');
@@ -29,8 +30,19 @@ document.getElementById('submitBtn').addEventListener('click', function() {
             document.getElementById('answerInput').classList.remove('shake');
         }, 500);
     }
+}
+
+// 點擊確認按鈕時檢查答案
+document.getElementById('submitBtn').addEventListener('click', checkAnswer);
+
+// 按下 Enter 鍵時也能檢查答案
+document.getElementById('answerInput').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        checkAnswer();
+    }
 });
 
+// 生成下一題
 document.getElementById('nextQuestionBtn').addEventListener('click', function() {
     currentQuestion = generateQuestion();
     document.getElementById('question').innerHTML = `${currentQuestion.num1} + ${currentQuestion.num2} = ?`;
