@@ -22,7 +22,8 @@ document.getElementById('submitBtn').addEventListener('click', function() {
         feedback.innerHTML = "答錯了，請再試一次。";
         feedback.style.color = "red";
         document.getElementById('answerInput').classList.add('shake');
-        
+        document.getElementById('answerInput').select();  // 反白錯誤答案
+
         // 移除震動效果
         setTimeout(function() {
             document.getElementById('answerInput').classList.remove('shake');
