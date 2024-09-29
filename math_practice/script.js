@@ -9,16 +9,24 @@ let currentQuestion = generateQuestion();
 
 document.getElementById('question').innerHTML = `${currentQuestion.num1} + ${currentQuestion.num2} = ?`;
 
+// 當網頁載入時，焦點自動放在文字框
+window.onload = function() {
+    document.getElementById('answerInput').focus();
+};
+
 // 確認答案的功能
 function checkAnswer() {
     const userAnswer = parseInt(document.getElementById('answerInput').value);
     const feedback = document.getElementById('feedback');
-    const nextQuestionBtn = document.getElementById('nextQuestionBtn');
-
+    
     if (userAnswer === currentQuestion.answer) {
         feedback.innerHTML = "答對了！";
         feedback.style.color = "green";
-        nextQuestionBtn.style.display = "block";
+        
+        // 2秒後自動生成下一題
+        setTimeout(function() {
+            nextQuestion();
+        }, 2000);
     } else {
         feedback.innerHTML = "答錯了，請再試一次。";
         feedback.style.color = "red";
@@ -32,6 +40,15 @@ function checkAnswer() {
     }
 }
 
+// 生成下一題並將焦點再次放在文字框
+function nextQuestion() {
+    currentQuestion = generateQuestion();
+    document.getElementById('question').innerHTML = `${currentQuestion.num1} + ${currentQuestion.num2} = ?`;
+    document.getElementById('answerInput').value = '';
+    document.getElementById('feedback').innerHTML = '';
+    document.getElementById('answerInput').focus();  // 焦點重新回到文字框
+}
+
 // 點擊確認按鈕時檢查答案
 document.getElementById('submitBtn').addEventListener('click', checkAnswer);
 
@@ -40,13 +57,4 @@ document.getElementById('answerInput').addEventListener('keydown', function(even
     if (event.key === 'Enter') {
         checkAnswer();
     }
-});
-
-// 生成下一題
-document.getElementById('nextQuestionBtn').addEventListener('click', function() {
-    currentQuestion = generateQuestion();
-    document.getElementById('question').innerHTML = `${currentQuestion.num1} + ${currentQuestion.num2} = ?`;
-    document.getElementById('answerInput').value = '';
-    document.getElementById('feedback').innerHTML = '';
-    this.style.display = "none";
 });
