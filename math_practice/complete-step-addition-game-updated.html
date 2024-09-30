@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>优化的逐步加法练习游戏</title>
+    <style>
+        /* 保持原有的CSS样式不变 */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .game-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 250px;
+            height: 300px;
+            position: relative;
+        }
+        .number, .operator {
+            position: absolute;
+            font-size: 32px;
+            font-family: monospace;
+        }
+        .input-container {
+            position: absolute;
+            bottom: 100px;
+            right: 20px;
+            display: flex;
+        }
+        input {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            font-size: 24px;
+            border: 1px solid #000;
+            outline: none;
+            margin-left: 5px;
+        }
+        .carry-input {
+            position: absolute;
+            top: 20px;
+            right: 70px;
+            width: 30px;
+            height: 30px;
+            font-size: 20px;
+        }
+        .blue-line {
+            position: absolute;
+            height: 2px;
+            background-color: blue;
+            bottom: 158px;
+            left: 20px;
+            right: 20px;
+        }
+        .message {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            text-align: center;
+            font-size: 16px;
+            color: green;
+        }
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(5px); }
+            50% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+        .shake {
+            animation: shake 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container" class="game-container">
+        <div class="number" style="top: 60px; right: 80px;" id="num1-tens"></div>
+        <div class="number" style="top: 60px; right: 35px;" id="num1-ones"></div>
+        <div class="operator" style="top: 100px; right: 125px;">+</div>
+        <div class="number" style="top: 100px; right: 80px;" id="num2-tens"></div>
+        <div class="number" style="top: 100px; right: 35px;" id="num2-ones"></div>
+        <div class="blue-line"></div>
+        <div class="input-container">
+            <input type="text" maxlength="1" id="input-D" style="display: none;">
+            <input type="text" maxlength="1" id="input-C" style="display: none;">
+            <input type="text" maxlength="1" id="input-A">
+        </div>
+        <input type="text" maxlength="1" id="input-B" class="carry-input" style="display: none;">
+        <div class="message" id="message"></div>
+    </div>
+
+    <script>
+        let num1, num2;
+        let inputs = {A: '', B: '', C: '', D: ''};
+        let visibleInputs = ['A'];
+        let currentFocus = 'A';
+        let problemKey = 0;
+
+        function generateProblem() {
+            num1 = Math.floor(Math.random() * 90) + 10;
+            num2 = Math.floor(Math.random() * 90) + 10;
+            inputs = {A: '', B: '', C: '', D: ''};
+            visibleInputs = ['A'];
+            currentFocus = 'A';
+            document.getElementById('message').textContent = '';
+            problemKey++;
+
+            document.getElementById('num1-tens').textContent = Math.floor(num1/10);
+            document.getElementById('num1-ones').textContent = num1 % 10;
+            document.getElementById('num2-tens').textContent = Math.floor(num2/10);
+            document.getElementById('num2-ones').textContent = num2 % 10;
+
+            ['A', 'B', 'C', 'D'].forEach(step => {
+                const input = document.getElementById(`input-${step}`);
+                input.value = '';
+                input.style.display = step === 'A' ? 'block' : 'none';
+            });
+
+            document.getElementById('input-A').focus();
+        }
+
+        function checkAnswer(step, value) {
+            let correct = false;
+            const nextStep = {A: 'B', B: 'C', C: 'D', D: 'A'};
+            
+            switch (step) {
+                case 'A':
+                    correct = parseInt(value) === (num1 + num2) % 10;
+                    if (correct) {
+                        const carry = Math.floor((num1 % 10 + num2 % 10) / 10);
+                        if (carry === 0) {
+                            inputs.B = '0';
+                            visibleInputs.push('C');
+                            currentFocus = 'C';
+                            document.getElementById('input-C').style.display = 'block';
+                            document.getElementById('input-C').focus();
+                        } else {
+                            visibleInputs.push('B');
+                            currentFocus = 'B';
+                            document.getElementById('input-B').style.display = 'block';
+                            document.getElementById('input-B').focus();
+                        }
+                    }
+                    break;
+                case 'B':
+                    correct = parseInt(value) === Math.floor((num1 % 10 + num2 % 10) / 10);
+                    if (correct) {
+                        visibleInputs.push('C');
+                        currentFocus = 'C';
+                        document.getElementById('input-C').style.display = 'block';
+                        document.getElementById('input-C').focus();
+                    }
+                    break;
+                case 'C':
+                    const sumTens = Math.floor(num1 / 10) + Math.floor(num2 / 10) + parseInt(inputs.B || '0');
+                    correct = parseInt(value) === sumTens % 10;
+                    if (correct) {
+                        if (Math.floor(sumTens / 10) === 0) {
+                            finishProblem();
+                        } else {
+                            visibleInputs.push('D');
+                            currentFocus = 'D';
+                            document.getElementById('input-D').style.display = 'block';
+                            document.getElementById('input-D').focus();
+                        }
+                    }
+                    break;
+                case 'D':
+                    const sumHundreds = Math.floor((num1 + num2) / 100);
+                    correct = parseInt(value) === sumHundreds;
+                    if (correct) {
+                        finishProblem();
+                    }
+                    break;
+            }
+
+            if (correct) {
+                inputs[step] = value;
+                document.getElementById(`input-${step}`).value = value;
+            } else {
+                document.getElementById('game-container').classList.add('shake');
+                setTimeout(() => document.getElementById('game-container').classList.remove('shake'), 500);
+                document.getElementById(`input-${step}`).value = '';
+            }
+        }
+
+        function finishProblem() {
+            document.getElementById('message').textContent = '正確！';
+            setTimeout(() => {
+                generateProblem();
+            }, 2000);
+        }
+
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const step = e.target.id.split('-')[1];
+                checkAnswer(step, e.target.value);
+            });
+        });
+
+        generateProblem();
+    </script>
+</body>
+</html>
