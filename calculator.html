@@ -1,0 +1,244 @@
+<html><head><base href="/" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>可愛小朋友計算機</title>
+<style>
+:root {
+  --primary: #FF9EAA;
+  --secondary: #FFD6DD;
+  --accent: #FFF0F3;
+}
+
+body {
+  font-family: "Comic Sans MS", cursive;
+  background-color: var(--accent);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.calculator {
+  background-color: var(--secondary);
+  padding: 20px;
+  border-radius: 25px;
+  box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+  border: 5px solid var(--primary);
+}
+
+.display {
+  background-color: white;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 15px;
+  text-align: right;
+  font-size: 2em;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  border: 3px solid var(--primary);
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+button {
+  padding: 20px;
+  font-size: 1.5em;
+  border: none;
+  border-radius: 15px;
+  background-color: white;
+  cursor: pointer;
+  transition: transform 0.1s;
+  border: 3px solid var(--primary);
+  color: #666;
+  font-family: "Comic Sans MS", cursive;
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+button:hover {
+  background-color: var(--primary);
+  color: white;
+}
+
+.operator {
+  background-color: var(--primary);
+  color: white;
+}
+
+.equals {
+  background-color: #FFB6C1;
+  color: white;
+  grid-column: span 2;
+}
+
+.clear {
+  background-color: #FFB6C1;
+  color: white;
+}
+
+.animal {
+  position: fixed;
+  width: 100px;
+  height: 100px;
+}
+
+#rabbit {
+  top: 20px;
+  left: 20px;
+}
+
+#bear {
+  bottom: 20px;
+  right: 20px;
+}
+</style>
+</head>
+<body>
+
+<svg id="rabbit" class="animal" viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="30" fill="#FFF" stroke="#FF9EAA" stroke-width="3"/>
+  <circle cx="40" cy="40" r="5" fill="#000"/>
+  <circle cx="60" cy="40" r="5" fill="#000"/>
+  <ellipse cx="50" cy="55" rx="8" ry="5" fill="#FFB6C1"/>
+  <path d="M30 20 Q50 10 70 20" fill="none" stroke="#FF9EAA" stroke-width="3"/>
+</svg>
+
+<svg id="bear" class="animal" viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="30" fill="#C4A484" stroke="#8B4513" stroke-width="3"/>
+  <circle cx="40" cy="40" r="5" fill="#000"/>
+  <circle cx="60" cy="40" r="5" fill="#000"/>
+  <circle cx="50" cy="55" r="8" fill="#8B4513"/>
+  <circle cx="30" cy="30" r="10" fill="#C4A484" stroke="#8B4513" stroke-width="3"/>
+  <circle cx="70" cy="30" r="10" fill="#C4A484" stroke="#8B4513" stroke-width="3"/>
+</svg>
+
+<div class="calculator">
+  <div class="display">0</div>
+  <div class="buttons">
+    <button class="clear">C</button>
+    <button class="operator">÷</button>
+    <button class="operator">×</button>
+    <button class="operator">-</button>
+    <button>7</button>
+    <button>8</button>
+    <button>9</button>
+    <button class="operator">+</button>
+    <button>4</button>
+    <button>5</button>
+    <button>6</button>
+    <button>0</button>
+    <button>1</button>
+    <button>2</button>
+    <button>3</button>
+    <button class="equals">=</button>
+  </div>
+</div>
+
+<script>
+let display = document.querySelector('.display');
+let buttons = document.querySelectorAll('button');
+let firstNumber = '';
+let operator = '';
+let secondNumber = '';
+let shouldResetDisplay = false;
+
+buttons.forEach(button => {
+  button.addEventListener('click', () => {
+    let value = button.textContent;
+    
+    if (value >= '0' && value <= '9') {
+      if (shouldResetDisplay) {
+        display.textContent = value;
+        shouldResetDisplay = false;
+      } else {
+        if (display.textContent === '0') {
+          display.textContent = value;
+        } else {
+          display.textContent += value;
+        }
+      }
+      
+      if (operator) {
+        secondNumber = display.textContent;
+      } else {
+        firstNumber = display.textContent;
+      }
+    }
+    
+    if (value === 'C') {
+      display.textContent = '0';
+      firstNumber = '';
+      operator = '';
+      secondNumber = '';
+      shouldResetDisplay = false;
+    }
+    
+    if (['+', '-', '×', '÷'].includes(value)) {
+      operator = value;
+      shouldResetDisplay = true;
+    }
+    
+    if (value === '=') {
+      let result;
+      let num1 = parseFloat(firstNumber);
+      let num2 = parseFloat(secondNumber);
+      
+      switch(operator) {
+        case '+':
+          result = num1 + num2;
+          break;
+        case '-':
+          result = num1 - num2;
+          break;
+        case '×':
+          result = num1 * num2;
+          break;
+        case '÷':
+          result = num1 / num2;
+          break;
+      }
+      
+      if (isNaN(result)) {
+        display.textContent = '錯誤';
+      } else {
+        display.textContent = Math.round(result * 100) / 100;
+      }
+      
+      firstNumber = display.textContent;
+      operator = '';
+      secondNumber = '';
+      shouldResetDisplay = true;
+    }
+  });
+});
+
+// 添加動畫效果
+function moveAnimals() {
+  const rabbit = document.getElementById('rabbit');
+  const bear = document.getElementById('bear');
+  
+  let rabbitX = 20;
+  let bearX = window.innerWidth - 120;
+  
+  setInterval(() => {
+    rabbitX = rabbitX === 20 ? window.innerWidth - 120 : 20;
+    bearX = bearX === 20 ? window.innerWidth - 120 : 20;
+    
+    rabbit.style.transition = 'left 2s ease-in-out';
+    bear.style.transition = 'right 2s ease-in-out';
+    
+    rabbit.style.left = rabbitX + 'px';
+    bear.style.right = (window.innerWidth - bearX - 100) + 'px';
+  }, 4000);
+}
+
+moveAnimals();
+</script>
+
+</body></html>
